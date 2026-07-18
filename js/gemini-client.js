@@ -10,9 +10,9 @@ const GeminiClient = (() => {
   'use strict';
 
   // ── Constants ────────────────────────────────────────────────
-  const MODEL          = 'gemini-1.5-flash';
-  const API_BASE       = 'https://generativelanguage.googleapis.com/v1beta/models';
-  const ENDPOINT       = `${API_BASE}/${MODEL}:generateContent`;
+  const MODEL = 'gemini-2.5-flash';
+  const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+  const ENDPOINT = `${API_BASE}/${MODEL}:generateContent`;
 
   // Max characters to send per chunk (keep well under token limits)
   const CHUNK_MAX_CHARS = 12_000;
@@ -25,7 +25,7 @@ const GeminiClient = (() => {
 
   // ── State ────────────────────────────────────────────────────
   let _abortController = null;
-  let _isGenerating    = false;
+  let _isGenerating = false;
 
   // ── Question Schema ──────────────────────────────────────────
   /**
@@ -134,29 +134,29 @@ ${chunkText}
 
   // ── Single Gemini API call ───────────────────────────────────
   async function _callGemini(apiKey, prompt, signal) {
-    const url     = `${ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
+    const url = `${ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature:     0.4,
-        topP:            0.9,
-        topK:            40,
+        temperature: 0.4,
+        topP: 0.9,
+        topK: 40,
         maxOutputTokens: 8192,
         // Request JSON output
         responseMimeType: 'application/json',
       },
       safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT',       threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
         { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
         { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
       ],
     };
 
     const response = await fetch(url, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
+      body: JSON.stringify(payload),
       signal,
     });
 
@@ -279,17 +279,17 @@ ${chunkText}
     if (!apiKey) return { success: false, error: 'No API key provided.' };
 
     try {
-      const url     = `${ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
+      const url = `${ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
       const payload = {
         contents: [{ parts: [{ text: 'Reply with exactly: {"ok":true}' }] }],
         generationConfig: { temperature: 0, maxOutputTokens: 20 },
       };
 
       const response = await fetch(url, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
-        signal:  AbortSignal.timeout(10_000),
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10_000),
       });
 
       if (!response.ok) {
@@ -334,11 +334,11 @@ ${chunkText}
    */
   async function generate({ apiKey, text, sourceFile, pageCount, wordCount, onProgress }) {
     if (_isGenerating) cancel();
-    _isGenerating    = true;
+    _isGenerating = true;
     _abortController = new AbortController();
-    const signal     = _abortController.signal;
+    const signal = _abortController.signal;
 
-    const warnings  = [];
+    const warnings = [];
     let allQuestions = [];
 
     try {
@@ -362,19 +362,19 @@ ${chunkText}
           : 'Generating quiz with Gemini…';
 
         onProgress?.({
-          chunk:       i + 1,
+          chunk: i + 1,
           totalChunks,
-          percent:     Math.round(((i) / totalChunks) * 90), // reserve last 10% for finalise
-          status:      statusText,
+          percent: Math.round(((i) / totalChunks) * 90), // reserve last 10% for finalise
+          status: statusText,
         });
 
         // Call Gemini
-        const prompt   = _buildPrompt(chunks[i], i, totalChunks);
+        const prompt = _buildPrompt(chunks[i], i, totalChunks);
         const response = await _callGemini(apiKey, prompt, signal);
 
         if (signal.aborted) throw new DOMException('Cancelled.', 'AbortError');
 
-        const rawText  = _extractResponseText(response);
+        const rawText = _extractResponseText(response);
         let chunkQs;
 
         try {
@@ -426,11 +426,11 @@ ${chunkText}
 
       /** @type {GeneratedQuiz} */
       const quiz = {
-        questions:   allQuestions,
+        questions: allQuestions,
         sourceFile,
         pageCount,
         wordCount,
-        chunksUsed:  chunks.length,
+        chunksUsed: chunks.length,
         generatedAt: Date.now(),
       };
 
@@ -442,7 +442,7 @@ ${chunkText}
       }
       return { success: false, error: err.message || 'An unexpected error occurred.' };
     } finally {
-      _isGenerating    = false;
+      _isGenerating = false;
       _abortController = null;
     }
   }
