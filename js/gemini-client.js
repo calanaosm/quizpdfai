@@ -11,6 +11,7 @@ const GeminiClient = (() => {
 
   // ── Constants ────────────────────────────────────────────────
   const MODEL = 'gemini-flash-latest';
+  // Base URL for Gemini API. The API key must be supplied at runtime via the `apiKey` argument in calls.
   const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
   const ENDPOINT = `${API_BASE}/${MODEL}:generateContent`;
 
