@@ -109,7 +109,7 @@ const SettingsPage = (() => {
 
       if (result.success) {
         _updateApiStatus('ok');
-        Toast.success(`✓ Connected to Gemini (${result.model || 'gemini-1.5-flash'})`, 5000);
+        Toast.success(`✓ Connected to Gemini (${result.model || 'gemini-2.5-flash'})`, 5000);
       } else {
         _updateApiStatus('error');
         Toast.error(`✗ Connection failed: ${result.error}`, 8000);
