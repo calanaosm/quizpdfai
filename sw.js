@@ -5,8 +5,8 @@
  * Strategy: Cache-first for shell assets, network-first for API calls.
  */
 
-const CACHE_NAME   = 'quizpdfai-v4';
-const RUNTIME_NAME = 'quizpdfai-runtime-v4';
+const CACHE_NAME   = 'quizpdfai-v5';
+const RUNTIME_NAME = 'quizpdfai-runtime-v5';
 
 // Shell assets to pre-cache on install
 const PRECACHE_ASSETS = [
