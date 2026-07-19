@@ -20,9 +20,12 @@ const Store = (() => {
     }
   }
 
-  function set(name, value) {
+  function set(name, value, skipSync = false) {
     try {
       localStorage.setItem(key(name), JSON.stringify(value));
+      if (!skipSync && (name === 'settings' || name === 'quiz_history')) {
+        _syncToCloud();
+      }
       return true;
     } catch {
       return false;
@@ -169,6 +172,40 @@ const Store = (() => {
   function setActiveQuizState(state) {
     return set('active_quiz_state', state);
   }
+
+  // ── Phase 6: Cloud Sync ─────────────────────────────────────
+  let _syncDebounce = null;
+  function _syncToCloud() {
+    if (!window.FirebaseClient || !window.FirebaseClient.currentUser) return;
+    clearTimeout(_syncDebounce);
+    _syncDebounce = setTimeout(() => {
+      window.FirebaseClient.syncDataToCloud({
+        settings: getSettings(),
+        quiz_history: getQuizHistory()
+      });
+    }, 1500);
+  }
+
+  function _loadFromCloud(cloudData) {
+    if (cloudData.settings) set('settings', cloudData.settings, true);
+    if (cloudData.quiz_history) set('quiz_history', cloudData.quiz_history, true);
+    // Reload UI if on a page that needs it, or just rely on next render
+    window.dispatchEvent(new CustomEvent('quizpdfai-cloud-sync'));
+  }
+
+  window.addEventListener('load', () => {
+    // Wait for the Firebase module to attach to window
+    setTimeout(() => {
+      if (window.FirebaseClient) {
+        window.FirebaseClient.onUserChange(async (user) => {
+          if (user) {
+            const data = await window.FirebaseClient.fetchDataFromCloud();
+            if (data) _loadFromCloud(data);
+          }
+        });
+      }
+    }, 500);
+  });
 
   return {
     get, set, remove, clear,

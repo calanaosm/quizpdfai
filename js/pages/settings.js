@@ -144,6 +144,43 @@ const SettingsPage = (() => {
     if (aboutDesc) aboutDesc.textContent = 'Version 1.0.0 — Phase 3';
   }
 
+  // ── Auth Handling ────────────────────────────────────────────
+  function _updateAuthUI(user) {
+    const label = document.getElementById('auth-status-label');
+    const desc = document.getElementById('auth-status-desc');
+    const btn = document.getElementById('btn-auth-action');
+    if (!label || !desc || !btn) return;
+
+    if (user) {
+      label.textContent = user.displayName || user.email || 'Signed In';
+      desc.textContent = 'Your data is syncing to the cloud';
+      btn.textContent = 'Sign Out';
+      btn.className = 'btn btn-sm btn-secondary ripple-container';
+    } else {
+      label.textContent = 'Not Signed In';
+      desc.textContent = 'Sign in to sync your quiz history across devices';
+      btn.textContent = 'Sign In';
+      btn.className = 'btn btn-sm btn-primary ripple-container';
+    }
+  }
+
+  async function _handleAuthAction() {
+    if (!window.FirebaseClient) {
+      Toast.error('Cloud Sync is currently initializing. Please try again in a moment.');
+      return;
+    }
+    
+    if (window.FirebaseClient.currentUser) {
+      const res = await window.FirebaseClient.logOut();
+      if (res.success) Toast.success('Signed out successfully.');
+      else Toast.error(`Sign out failed: ${res.error}`);
+    } else {
+      const res = await window.FirebaseClient.signInWithGoogle();
+      if (res.success) Toast.success('Signed in successfully! Syncing data...');
+      else Toast.error(`Sign in failed: ${res.error}`);
+    }
+  }
+
   function init() {
     _updateApiStatus();
     _syncDarkToggle();
@@ -154,6 +191,14 @@ const SettingsPage = (() => {
     document.getElementById('btn-test-connection')?.addEventListener('click', _testConnection);
     document.getElementById('reveal-key-btn')?.addEventListener('click', _toggleReveal);
     document.getElementById('btn-clear-history')?.addEventListener('click', _clearHistory);
+    document.getElementById('btn-auth-action')?.addEventListener('click', _handleAuthAction);
+
+    // Initial auth UI load
+    setTimeout(() => {
+      if (window.FirebaseClient) {
+        window.FirebaseClient.onUserChange(_updateAuthUI);
+      }
+    }, 500);
 
     const darkToggle = document.getElementById('dark-mode-toggle');
     darkToggle?.addEventListener('change', () => Theme.toggle());

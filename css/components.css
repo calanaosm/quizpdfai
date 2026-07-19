@@ -993,7 +993,8 @@
    PHASE 2: EXTRACTION PROGRESS OVERLAY
    ══════════════════════════════════════════ */
 
-#extraction-overlay {
+#extraction-overlay,
+#generation-overlay {
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
@@ -1009,12 +1010,14 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-#extraction-overlay.visible {
+#extraction-overlay.visible,
+#generation-overlay.visible {
   opacity: 1;
   visibility: visible;
 }
 
-#extraction-overlay.hidden {
+#extraction-overlay.hidden,
+#generation-overlay.hidden {
   display: none;
 }
 

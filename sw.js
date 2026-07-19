@@ -5,8 +5,8 @@
  * Strategy: Cache-first for shell assets, network-first for API calls.
  */
 
-const CACHE_NAME   = 'quizpdfai-v5';
-const RUNTIME_NAME = 'quizpdfai-runtime-v5';
+const CACHE_NAME   = 'quizpdfai-v8';
+const RUNTIME_NAME = 'quizpdfai-runtime-v8';
 
 // Shell assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -23,6 +23,7 @@ const PRECACHE_ASSETS = [
   './js/app.js',
   './js/pdf-extractor.js',
   './js/gemini-client.js',
+  './js/firebase-client.js',
   './js/utils/theme.js',
   './js/utils/toast.js',
   './js/pages/home.js',
